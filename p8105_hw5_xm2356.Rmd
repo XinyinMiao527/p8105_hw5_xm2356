@@ -1,0 +1,21 @@
+---
+title: "p8105_hw5_xm2356"
+author: "Xinyin Miao (xm2356)"
+date: "2025-11-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+set.seed(1)
+
+knitr::opts_chunk$set(
+  echo = TRUE, message = FALSE, warning = FALSE,
+  fig.align = "center", fig.width = 7, fig.height = 4, dpi = 200
+)
+
+
+if (!dir.exists("data")) dir.create("data")
+if (!dir.exists("results")) dir.create("results")
+```
+
