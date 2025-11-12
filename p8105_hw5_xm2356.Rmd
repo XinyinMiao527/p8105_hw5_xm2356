@@ -19,3 +19,55 @@ if (!dir.exists("data")) dir.create("data")
 if (!dir.exists("results")) dir.create("results")
 ```
 
+# Problem 1
+
+```{r}
+bday_sim = function(n_room){
+  birthdays = sample(1:365, n_room, replace = TRUE)
+  
+  repeated_bday = length(unique(birthdays)) < n_room
+  
+  repeated_bday
+}
+
+
+bday_sim_results = 
+  expand_grid(
+    bdays = 2:50,        
+    iter = 1:10000        
+  ) |> 
+  mutate(
+    result = map_lgl(bdays, bday_sim)   
+  ) |> 
+  group_by(
+    bdays
+  ) |> 
+  summarize(
+    prob_repeat = mean(result)
+  )
+
+
+bday_sim_results |> 
+  ggplot(aes(x = bdays, y = prob_repeat)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title = "Probability of at least one shared birthday",
+    x = "Group size",
+    y = "Estimated probability"
+  ) +
+  theme_minimal(base_size = 12)
+
+```
+
+The simulated results show a sharply increasing relationship between group size and the probability that at least two people share a birthday. When the group size is small (fewer than 10 people), the probability of a shared birthday is close to zero. As the number of people increases, this probability rises rapidly, reaching approximately 50% when there are about 23 individuals in the room. Beyond 40 people, the probability exceeds 90%, and by 50 it approaches certainty. These results highlight how counter-intuitive probability can be: even with only a few dozen people, coincidences such as shared birthdays become surprisingly likely. The smooth S-shaped curve confirms the robustness of the simulation and aligns closely with theoretical expectations.
+
+
+
+
+
+
+
+
+
