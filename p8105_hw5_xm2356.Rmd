@@ -19,7 +19,7 @@ if (!dir.exists("data")) dir.create("data")
 if (!dir.exists("results")) dir.create("results")
 ```
 
-# Problem 1
+# Problem 1 
 
 ```{r}
 bday_sim = function(n_room){
@@ -63,6 +63,30 @@ bday_sim_results |>
 
 The simulated results show a sharply increasing relationship between group size and the probability that at least two people share a birthday. When the group size is small (fewer than 10 people), the probability of a shared birthday is close to zero. As the number of people increases, this probability rises rapidly, reaching approximately 50% when there are about 23 individuals in the room. Beyond 40 people, the probability exceeds 90%, and by 50 it approaches certainty. These results highlight how counter-intuitive probability can be: even with only a few dozen people, coincidences such as shared birthdays become surprisingly likely. The smooth S-shaped curve confirms the robustness of the simulation and aligns closely with theoretical expectations.
 
+
+# Problem 2
+
+```{r}
+n <- 30
+sigma <- 5
+alpha <- 0.05
+mus <- 0:6
+n_sims <- 5000
+
+sim_one_mu <- function(mu, n_sims, n, sigma, alpha = 0.05) {
+  tibble(sim = 1:n_sims) |>
+    mutate(
+      x = map(sim, ~ rnorm(n, mean = mu, sd = sigma)),
+      t_out = map(x, ~ t.test(.x, mu = 0, conf.level = 1 - alpha)),
+      t_tidy = map(t_out, broom::tidy)
+    ) |>
+    select(-x, -t_out) |>
+    unnest(t_tidy) |>
+    transmute(mu = mu, estimate = estimate, p_value = p.value)
+}
+
+
+```
 
 
 

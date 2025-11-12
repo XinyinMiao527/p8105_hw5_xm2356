@@ -408,6 +408,26 @@ only a few dozen people, coincidences such as shared birthdays become
 surprisingly likely. The smooth S-shaped curve confirms the robustness
 of the simulation and aligns closely with theoretical expectations.</p>
 </div>
+<div id="problem-2" class="section level1">
+<h1>Problem 2</h1>
+<pre class="r"><code>n &lt;- 30
+sigma &lt;- 5
+alpha &lt;- 0.05
+mus &lt;- 0:6
+n_sims &lt;- 5000
+
+sim_one_mu &lt;- function(mu, n_sims, n, sigma, alpha = 0.05) {
+  tibble(sim = 1:n_sims) |&gt;
+    mutate(
+      x = map(sim, ~ rnorm(n, mean = mu, sd = sigma)),
+      t_out = map(x, ~ t.test(.x, mu = 0, conf.level = 1 - alpha)),
+      t_tidy = map(t_out, broom::tidy)
+    ) |&gt;
+    select(-x, -t_out) |&gt;
+    unnest(t_tidy) |&gt;
+    transmute(mu = mu, estimate = estimate, p_value = p.value)
+}</code></pre>
+</div>
 
 
 
