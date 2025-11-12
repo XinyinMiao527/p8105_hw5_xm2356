@@ -427,6 +427,22 @@ sim_one_mu &lt;- function(mu, n_sims, n, sigma, alpha = 0.05) {
     unnest(t_tidy) |&gt;
     transmute(mu = mu, estimate = estimate, p_value = p.value)
 }</code></pre>
+<pre class="r"><code>p2_sims &lt;- map_dfr(mus, ~ sim_one_mu(.x, n_sims, n, sigma, alpha))
+
+p2_power &lt;- p2_sims |&gt;
+  group_by(mu) |&gt;
+  summarise(power = mean(p_value &lt; alpha), .groups = &quot;drop&quot;)</code></pre>
+<pre class="r"><code>p_power &lt;- p2_power |&gt;
+  ggplot(aes(mu, power)) +
+  geom_line() +
+  geom_point(size = 1.5) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title = &quot;Power of one-sample t-test (n = 30, σ = 5, α = 0.05)&quot;,
+    x = expression(true~mu),
+    y = &quot;Power (rejection rate)&quot;
+  ) +
+  theme_minimal(base_size = 12)</code></pre>
 </div>
 
 
