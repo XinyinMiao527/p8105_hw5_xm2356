@@ -113,6 +113,7 @@ p_power <- p2_power |>
 p_power
 ```
 
+The plot shows that statistical power increases rapidly as the true mean (μ) moves further away from zero. When μ = 0, the probability of rejecting the null hypothesis is approximately 5%, as expected for a test with α = 0.05. As the effect size grows, the power rises sharply: around μ = 2, the test detects a true effect more than half of the time, and by μ ≥ 4, power approaches 100%. This strong positive association indicates that larger deviations from the null hypothesis make it easier for the t-test to identify true effects. 
 
 ## Average estimate vs mu
 ```{r}
@@ -138,7 +139,9 @@ p_est_all + p_est_rej + plot_layout(ncol = 2)
 
 ```
 
+The left plot shows that the average estimated mean (𝜇̂) across all simulations closely matches the true value of 𝜇 for every setting, forming an almost perfect 1:1 line. This confirms that the one-sample t-test is an unbiased estimator of the true mean when considering all samples, regardless of statistical significance.
 
+In contrast, the right plot shows that when we restrict attention only to samples where the null hypothesis was rejected (p < 0.05), the average estimate of 𝜇̂ is systematically higher than the true value, especially when the true effect size is small. This bias arises from selection based on statistical significance—only unusually large sample means tend to yield small p-values when the true effect is weak. Consequently, the conditional average exaggerates the magnitude of the effect.
 
 
 
