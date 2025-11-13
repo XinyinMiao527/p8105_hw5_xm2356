@@ -139,9 +139,12 @@ p_est_all + p_est_rej + plot_layout(ncol = 2)
 
 ```
 
-The left plot shows that the average estimated mean (𝜇̂) across all simulations closely matches the true value of 𝜇 for every setting, forming an almost perfect 1:1 line. This confirms that the one-sample t-test is an unbiased estimator of the true mean when considering all samples, regardless of statistical significance.
-
-In contrast, the right plot shows that when we restrict attention only to samples where the null hypothesis was rejected (p < 0.05), the average estimate of 𝜇̂ is systematically higher than the true value, especially when the true effect size is small. This bias arises from selection based on statistical significance—only unusually large sample means tend to yield small p-values when the true effect is weak. Consequently, the conditional average exaggerates the magnitude of the effect.
+The sample average of 𝜇̂ across tests for which the null hypothesis was rejected is not approximately equal to the true value of 𝜇, particularly when the true effect size is small.
+This occurs because statistical significance depends on both the observed effect and random sampling variation.
+When 𝜇 is close to zero, only samples with unusually large random deviations from the null tend to produce p-values below 0.05.
+As a result, the subset of “significant” results is biased toward overestimates of the true mean, inflating the conditional average of 𝜇̂.
+This selection bias—often causes the right-hand plot to lie consistently above the 1:1 line.
+In contrast, when averaging across all tests (regardless of significance), the estimates are unbiased and align closely with the true μ.
 
 
 
