@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(patchwork)
 set.seed(1)
 
 knitr::opts_chunk$set(
@@ -87,19 +88,16 @@ sim_one_mu <- function(mu, n_sims, n, sigma, alpha = 0.05) {
 
 ```
 
-
 ```{r}
 p2_sims <- map_dfr(mus, ~ sim_one_mu(.x, n_sims, n, sigma, alpha))
+```
 
+## Power curve: proportion of rejections vs mu
+```{r}
 p2_power <- p2_sims |>
   group_by(mu) |>
   summarise(power = mean(p_value < alpha), .groups = "drop")
 
-
-```
-
-
-```{r}
 p_power <- p2_power |>
   ggplot(aes(mu, power)) +
   geom_line() +
@@ -111,6 +109,33 @@ p_power <- p2_power |>
     y = "Power (rejection rate)"
   ) +
   theme_minimal(base_size = 12)
+
+p_power
+```
+
+
+## Average estimate vs mu
+```{r}
+p2_est <- p2_sims |>
+  group_by(mu) |>
+  summarise(
+    avg_est_all = mean(estimate),
+    avg_est_reject = mean(estimate[p_value < alpha]),
+    .groups = "drop"
+  )
+
+p_est_all <- ggplot(p2_est, aes(mu, avg_est_all)) +
+  geom_line() + geom_point(size = 1.5) +
+  labs(title = "Average estimate across all tests", x = expression(true~mu), y = "Average estimate") +
+  theme_minimal(base_size = 12)
+
+p_est_rej <- ggplot(p2_est, aes(mu, avg_est_reject)) +
+  geom_line() + geom_point(size = 1.5) +
+  labs(title = "Average estimate among rejected tests only", x = expression(true~mu), y = "Average estimate") +
+  theme_minimal(base_size = 12)
+
+p_est_all + p_est_rej + plot_layout(ncol = 2)
+
 ```
 
 
