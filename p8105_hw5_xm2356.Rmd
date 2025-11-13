@@ -146,6 +146,13 @@ As a result, the subset of “significant” results is biased toward overestima
 This selection bias—often causes the right-hand plot to lie consistently above the 1:1 line.
 In contrast, when averaging across all tests (regardless of significance), the estimates are unbiased and align closely with the true μ.
 
+# Problem 3
+
+```{r}
+homicides_raw <- readr::read_csv("data/homicide-data.csv")
+```
+
+The raw dataset, obtained from The Washington Post, contains information on individual homicide cases reported in 50 large U.S. cities. Each row represents one homicide case. The dataset includes variables describing the victim’s demographics (last name, first name, age, sex, race), the location of the homicide (city, state, latitude, longitude), the case outcome (disposition) and the case reported date. The disposition variable indicates whether the case was “Closed by arrest,” “Closed without arrest,” or remains “Open/No arrest.” 
 
 
 
