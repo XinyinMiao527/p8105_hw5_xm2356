@@ -149,11 +149,31 @@ In contrast, when averaging across all tests (regardless of significance), the e
 # Problem 3
 
 ```{r}
-homicides_raw <- readr::read_csv("data/homicide-data.csv")
+homicides_raw = homicides_raw <- readr::read_csv("data/homicide-data.csv")
 ```
 
 The raw dataset, obtained from The Washington Post, contains information on individual homicide cases reported in 50 large U.S. cities. Each row represents one homicide case. The dataset includes variables describing the victim’s demographics (last name, first name, age, sex, race), the location of the homicide (city, state, latitude, longitude), the case outcome (disposition) and the case reported date. The disposition variable indicates whether the case was “Closed by arrest,” “Closed without arrest,” or remains “Open/No arrest.” 
 
+```{r}
+homicides_raw |> 
+  janitor::clean_names()
 
+homicides <- homicides_raw |>
+  mutate(
+    city_state = str_c(city, ", ", state),
+    unsolved = disposition %in% c("Open/No arrest", "Closed without arrest")
+  )
+```
+
+
+```{r}
+city_totals <- homicides |>
+  group_by(city_state) |>
+  summarise(
+    total = n(),
+    unsolved = sum(unsolved, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
 
 

@@ -495,7 +495,7 @@ closely with the true μ.</p>
 </div>
 <div id="problem-3" class="section level1">
 <h1>Problem 3</h1>
-<pre class="r"><code>homicides_raw &lt;- readr::read_csv(&quot;data/homicide-data.csv&quot;)</code></pre>
+<pre class="r"><code>homicides_raw = homicides_raw &lt;- readr::read_csv(&quot;data/homicide-data.csv&quot;)</code></pre>
 <p>The raw dataset, obtained from The Washington Post, contains
 information on individual homicide cases reported in 50 large U.S.
 cities. Each row represents one homicide case. The dataset includes
@@ -504,6 +504,36 @@ age, sex, race), the location of the homicide (city, state, latitude,
 longitude), the case outcome (disposition) and the case reported date.
 The disposition variable indicates whether the case was “Closed by
 arrest,” “Closed without arrest,” or remains “Open/No arrest.”</p>
+<pre class="r"><code>homicides_raw |&gt; 
+  janitor::clean_names()</code></pre>
+<pre><code>## # A tibble: 52,179 × 12
+##    uid        reported_date victim_last  victim_first victim_race victim_age
+##    &lt;chr&gt;              &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;     
+##  1 Alb-000001      20100504 GARCIA       JUAN         Hispanic    78        
+##  2 Alb-000002      20100216 MONTOYA      CAMERON      Hispanic    17        
+##  3 Alb-000003      20100601 SATTERFIELD  VIVIANA      White       15        
+##  4 Alb-000004      20100101 MENDIOLA     CARLOS       Hispanic    32        
+##  5 Alb-000005      20100102 MULA         VIVIAN       White       72        
+##  6 Alb-000006      20100126 BOOK         GERALDINE    White       91        
+##  7 Alb-000007      20100127 MALDONADO    DAVID        Hispanic    52        
+##  8 Alb-000008      20100127 MALDONADO    CONNIE       Hispanic    52        
+##  9 Alb-000009      20100130 MARTIN-LEYVA GUSTAVO      White       56        
+## 10 Alb-000010      20100210 HERRERA      ISRAEL       Hispanic    43        
+## # ℹ 52,169 more rows
+## # ℹ 6 more variables: victim_sex &lt;chr&gt;, city &lt;chr&gt;, state &lt;chr&gt;, lat &lt;dbl&gt;,
+## #   lon &lt;dbl&gt;, disposition &lt;chr&gt;</code></pre>
+<pre class="r"><code>homicides &lt;- homicides_raw |&gt;
+  mutate(
+    city_state = str_c(city, &quot;, &quot;, state),
+    unsolved = disposition %in% c(&quot;Open/No arrest&quot;, &quot;Closed without arrest&quot;)
+  )</code></pre>
+<pre class="r"><code>city_totals &lt;- homicides |&gt;
+  group_by(city_state) |&gt;
+  summarise(
+    total = n(),
+    unsolved = sum(unsolved, na.rm = TRUE),
+    .groups = &quot;drop&quot;
+  )</code></pre>
 </div>
 
 
