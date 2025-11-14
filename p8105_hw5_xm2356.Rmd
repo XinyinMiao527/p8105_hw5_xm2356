@@ -1,7 +1,7 @@
 ---
 title: "p8105_hw5_xm2356"
 author: "Xinyin Miao (xm2356)"
-date: "2025-11-13"
+date: "2025-11-14"
 output: github_document
 ---
 
@@ -62,7 +62,7 @@ bday_sim_results |>
 
 ```
 
-The simulated results show a sharply increasing relationship between group size and the probability that at least two people share a birthday. When the group size is small (fewer than 10 people), the probability of a shared birthday is close to zero. As the number of people increases, this probability rises rapidly, reaching approximately 50% when there are about 23 individuals in the room. Beyond 40 people, the probability exceeds 90%, and by 50 it approaches certainty. These results highlight that: even with only a few dozen people, coincidences such as shared birthdays become surprisingly likely. The smooth S-shaped curve confirms the robustness of the simulation and aligns closely with theoretical expectations.
+The simulated results show the smooth S-shaped curve, showing a sharply increasing relationship between group size and the probability that at least two people share a birthday. When the group size is small (fewer than 10 people), the probability of a shared birthday is close to zero. As the number of people increases, this probability rises rapidly, reaching approximately 50% when there are about 23 individuals in the room. Beyond 40 people, the probability exceeds 90%, and by 50 it approaches certainty. These results highlight that: even with only a few dozen people, coincidences such as shared birthdays become surprisingly likely.
 
 
 # Problem 2
@@ -167,7 +167,8 @@ homicides = homicides_raw |>
     unsolved = disposition %in% c("Open/No arrest", "Closed without arrest")
   )
 homicides |> 
-  slice_head(n = 6)
+  slice_head(n = 6)|>
+  knitr::kable(digits = 3, caption = "Preview of cleaned data (first 6 rows)")
 ```
 
 ## Summarize totals and unsolved per city
@@ -182,7 +183,11 @@ city_totals <- homicides |>
 
 city_totals |> 
   arrange(desc(total)) |> 
-  slice_head(n = 10)
+  slice_head(n = 10)|>
+  knitr::kable(
+    digits  = 0,
+    caption = "Top 10 cities by number of homicide cases"
+  )
   
 ```
 
@@ -198,7 +203,8 @@ baltimore_tidy <- broom::tidy(prop.test(
   mutate(city_state = "Baltimore, MD") |>
   select(city_state, estimate, conf.low, conf.high) 
 
-baltimore_tidy
+baltimore_tidy|>
+  knitr::kable(digits = 4, caption = "Baltimore: estimated unsolved proportion (95% CI)")
 ```
 
 ## All cities
@@ -214,15 +220,18 @@ city_props <- city_totals |>
   select(city_state, estimate, conf.low, conf.high) |> 
   arrange(desc(estimate)) 
 
-city_props
+city_props|>
+  arrange(desc(estimate)) |>
+  knitr::kable(digits = 4, caption = "Estimated unsolved proportions by city")
 
 ```
 
 ## Plot
 
 ```{r, fig.width=7.5, fig.height=12, dpi=300}
-plot_city_ci <- city_props |>
-  ggplot(aes(x = reorder(city_state, estimate), y = estimate)) +
+plot_city_ci <- ggplot(
+  data = city_props,
+  aes(x = reorder(city_state, estimate), y = estimate)) +
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
   geom_point(size = 2) +
   coord_flip() +
