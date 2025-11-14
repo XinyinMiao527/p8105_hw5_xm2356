@@ -164,9 +164,11 @@ homicides <- homicides_raw |>
     city_state = str_c(city, ", ", state),
     unsolved = disposition %in% c("Open/No arrest", "Closed without arrest")
   )
+homicides |> 
+  slice_head(n = 6)
 ```
 
-## summarize totals and unsolved per city
+## Summarize totals and unsolved per city
 ```{r}
 city_totals <- homicides |>
   group_by(city_state) |>
@@ -175,6 +177,11 @@ city_totals <- homicides |>
     unsolved = sum(unsolved, na.rm = TRUE),
     .groups = "drop"
   )
+
+city_totals |> 
+  arrange(desc(total)) |> 
+  slice_head(n = 10)
+  
 ```
 
 ## Baltimore 
@@ -188,6 +195,8 @@ baltimore_tidy <- broom::tidy(prop.test(
 )) |>
   mutate(city_state = "Baltimore, MD") |>
   select(city_state, estimate, conf.low, conf.high)
+
+baltimore_tidy
 ```
 
 ## For all cities
@@ -201,8 +210,27 @@ city_props <- city_totals |>
   select(city_state, test_tidy) |>
   unnest(test_tidy) |>
   select(city_state, estimate, conf.low, conf.high)
+
+city_props
 ```
 
+
+```{r, fig.width=7.5, fig.height=12, dpi=300}
+plot_city_ci <- city_props |>
+  ggplot(aes(x = reorder(city_state, estimate), y = estimate)) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  geom_point(size = 2) +
+  coord_flip() +
+  labs(
+    title = "Estimated proportion of unsolved homicides by city (95% CI)",
+    x = NULL,
+    y = "Proportion unsolved"
+  ) +
+  theme_minimal(base_size = 12)
+
+plot_city_ci
+
+```
 
 
 
