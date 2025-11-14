@@ -24,6 +24,7 @@ if (!dir.exists("results")) dir.create("results")
 # Problem 1 
 
 ```{r}
+# write function
 bday_sim = function(n_room){
   birthdays = sample(1:365, n_room, replace = TRUE)
   
@@ -32,7 +33,7 @@ bday_sim = function(n_room){
   repeated_bday
 }
 
-
+# the probability of at least one shared birthday
 bday_sim_results = 
   expand_grid(
     bdays = 2:50,        
@@ -48,7 +49,9 @@ bday_sim_results =
     prob_repeat = mean(result)
   )
 
+bday_sim_results
 
+# plot
 bday_sim_results |> 
   ggplot(aes(x = bdays, y = prob_repeat)) +
   geom_point() +
@@ -63,7 +66,7 @@ bday_sim_results |>
 
 ```
 
-The simulated results show a sharply increasing relationship between group size and the probability that at least two people share a birthday. When the group size is small (fewer than 10 people), the probability of a shared birthday is close to zero. As the number of people increases, this probability rises rapidly, reaching approximately 50% when there are about 23 individuals in the room. Beyond 40 people, the probability exceeds 90%, and by 50 it approaches certainty. These results highlight how counter-intuitive probability can be: even with only a few dozen people, coincidences such as shared birthdays become surprisingly likely. The smooth S-shaped curve confirms the robustness of the simulation and aligns closely with theoretical expectations.
+The simulated results show a sharply increasing relationship between group size and the probability that at least two people share a birthday. When the group size is small (fewer than 10 people), the probability of a shared birthday is close to zero. As the number of people increases, this probability rises rapidly, reaching approximately 50% when there are about 23 individuals in the room. Beyond 40 people, the probability exceeds 90%, and by 50 it approaches certainty. These results highlight that: even with only a few dozen people, coincidences such as shared birthdays become surprisingly likely. The smooth S-shaped curve confirms the robustness of the simulation and aligns closely with theoretical expectations.
 
 
 # Problem 2
@@ -126,40 +129,43 @@ p2_est <- p2_sims |>
     .groups = "drop"
   )
 
-p_est_all <- ggplot(p2_est, aes(mu, avg_est_all)) +
-  geom_line() + geom_point(size = 1.5) +
-  labs(title = "Average estimate across all tests", x = expression(true~mu), y = "Average estimate") +
-  theme_minimal(base_size = 12)
+p_est_combined <- p2_est |>
+  ggplot(aes(x = mu)) +
+  # line for all tests
+  geom_line(aes(y = avg_est_all, color = "All tests"), linewidth = 1) +
+  geom_point(aes(y = avg_est_all, color = "All tests"), size = 1.5) +
+  # line for rejected tests
+  geom_line(aes(y = avg_est_reject, color = "Rejected only"), linewidth = 1) +
+  geom_point(aes(y = avg_est_reject, color = "Rejected only"), size = 1.5) +
+  # custom color legend
+  scale_color_manual(
+    values = c("All tests" = "steelblue", "Rejected only" = "firebrick")
+  ) +
+  labs(
+    title = "Average estimate of μ̂ across all vs. rejected tests",
+    x = expression(True~mu),
+    y = "Average estimate of μ̂",
+    color = "Sample group"
+  ) +
+  theme_minimal(base_size = 12) 
 
-p_est_rej <- ggplot(p2_est, aes(mu, avg_est_reject)) +
-  geom_line() + geom_point(size = 1.5) +
-  labs(title = "Average estimate among rejected tests only", x = expression(true~mu), y = "Average estimate") +
-  theme_minimal(base_size = 12)
-
-p_est_all + p_est_rej + plot_layout(ncol = 2)
+p_est_combined
 
 ```
 
-The sample average of 𝜇̂ across tests for which the null hypothesis was rejected is not approximately equal to the true value of 𝜇, particularly when the true effect size is small.
-This occurs because statistical significance depends on both the observed effect and random sampling variation.
-When 𝜇 is close to zero, only samples with unusually large random deviations from the null tend to produce p-values below 0.05.
-As a result, the subset of “significant” results is biased toward overestimates of the true mean, inflating the conditional average of 𝜇̂.
-This selection bias—often causes the right-hand plot to lie consistently above the 1:1 line.
-In contrast, when averaging across all tests (regardless of significance), the estimates are unbiased and align closely with the true μ.
+The sample average of 𝜇̂ across tests for which the null hypothesis was rejected is not approximately equal to the true value of 𝜇, especially when the true effect size is small. In the combined plot, the red line (“Rejected only”) is generally above the blue line (“All tests”) for small μ, though they overlap when the effect is large. This pattern shows that significant results tend to overestimate the true mean because only samples with unusually large random deviations achieve p < 0.05 when μ is near zero. As μ increases, this bias diminishes and the two lines converge. The blue line remains close to the true μ throughout, confirming that the one-sample t-test is unbiased overall without selection on significance.
 
 # Problem 3
 
 ```{r}
-homicides_raw = homicides_raw <- readr::read_csv("data/homicide-data.csv")
+homicides_raw = readr::read_csv("data/homicide-data.csv") |> 
+    janitor::clean_names()
 ```
 
-The raw dataset, obtained from The Washington Post, contains information on individual homicide cases reported in 50 large U.S. cities. Each row represents one homicide case. The dataset includes variables describing the victim’s demographics (last name, first name, age, sex, race), the location of the homicide (city, state, latitude, longitude), the case outcome (disposition) and the case reported date. The disposition variable indicates whether the case was “Closed by arrest,” “Closed without arrest,” or remains “Open/No arrest.” 
+The `homicides_raw` dataset has `r nrow(homicides_raw)` observations of criminal homicides reported in 50 large U.S. cities. Each row represents one homicide case. The dataset includes 12 variables describing the victim’s demographics (last name, first name, age, sex, race), the location of the homicide (city, state, latitude, longitude), the case outcome (disposition) and the case reported date. The disposition variable indicates whether the case was “Closed by arrest,” “Closed without arrest,” or remains “Open/No arrest.” 
 
 ```{r}
-homicides_raw |> 
-  janitor::clean_names()
-
-homicides <- homicides_raw |>
+homicides = homicides_raw |>
   mutate(
     city_state = str_c(city, ", ", state),
     unsolved = disposition %in% c("Open/No arrest", "Closed without arrest")
@@ -194,12 +200,12 @@ baltimore_tidy <- broom::tidy(prop.test(
   n = baltimore_counts$total
 )) |>
   mutate(city_state = "Baltimore, MD") |>
-  select(city_state, estimate, conf.low, conf.high)
+  select(city_state, estimate, conf.low, conf.high) 
 
 baltimore_tidy
 ```
 
-## For all cities
+## All cities
 
 ```{r}
 city_props <- city_totals |>
@@ -209,11 +215,14 @@ city_props <- city_totals |>
   ) |>
   select(city_state, test_tidy) |>
   unnest(test_tidy) |>
-  select(city_state, estimate, conf.low, conf.high)
+  select(city_state, estimate, conf.low, conf.high) |> 
+  arrange(desc(estimate)) 
 
 city_props
+
 ```
 
+## Plot
 
 ```{r, fig.width=7.5, fig.height=12, dpi=300}
 plot_city_ci <- city_props |>
