@@ -2,12 +2,11 @@
 title: "p8105_hw5_xm2356"
 author: "Xinyin Miao (xm2356)"
 date: "2025-11-11"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(patchwork)
 library(purrr)
 set.seed(1)
 
