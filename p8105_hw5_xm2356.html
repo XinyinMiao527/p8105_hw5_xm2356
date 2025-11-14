@@ -527,6 +527,8 @@ arrest,” “Closed without arrest,” or remains “Open/No arrest.”</p>
     city_state = str_c(city, &quot;, &quot;, state),
     unsolved = disposition %in% c(&quot;Open/No arrest&quot;, &quot;Closed without arrest&quot;)
   )</code></pre>
+<div id="summarize-totals-and-unsolved-per-city" class="section level2">
+<h2>summarize totals and unsolved per city</h2>
 <pre class="r"><code>city_totals &lt;- homicides |&gt;
   group_by(city_state) |&gt;
   summarise(
@@ -534,6 +536,29 @@ arrest,” “Closed without arrest,” or remains “Open/No arrest.”</p>
     unsolved = sum(unsolved, na.rm = TRUE),
     .groups = &quot;drop&quot;
   )</code></pre>
+</div>
+<div id="baltimore" class="section level2">
+<h2>Baltimore</h2>
+<pre class="r"><code>baltimore_counts &lt;- city_totals |&gt; filter(city_state == &quot;Baltimore, MD&quot;)
+
+baltimore_tidy &lt;- broom::tidy(prop.test(
+  x = baltimore_counts$unsolved,
+  n = baltimore_counts$total
+)) |&gt;
+  mutate(city_state = &quot;Baltimore, MD&quot;) |&gt;
+  select(city_state, estimate, conf.low, conf.high)</code></pre>
+</div>
+<div id="for-all-cities" class="section level2">
+<h2>For all cities</h2>
+<pre class="r"><code>city_props &lt;- city_totals |&gt;
+  mutate(
+    test_obj = map2(unsolved, total, ~ prop.test(.x, .y)),
+    test_tidy = map(test_obj, broom::tidy)
+  ) |&gt;
+  select(city_state, test_tidy) |&gt;
+  unnest(test_tidy) |&gt;
+  select(city_state, estimate, conf.low, conf.high)</code></pre>
+</div>
 </div>
 
 

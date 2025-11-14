@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(patchwork)
+library(purrr)
 set.seed(1)
 
 knitr::opts_chunk$set(
@@ -165,7 +166,7 @@ homicides <- homicides_raw |>
   )
 ```
 
-
+## summarize totals and unsolved per city
 ```{r}
 city_totals <- homicides |>
   group_by(city_state) |>
@@ -175,5 +176,42 @@ city_totals <- homicides |>
     .groups = "drop"
   )
 ```
+
+## Baltimore 
+
+```{r}
+baltimore_counts <- city_totals |> filter(city_state == "Baltimore, MD")
+
+baltimore_tidy <- broom::tidy(prop.test(
+  x = baltimore_counts$unsolved,
+  n = baltimore_counts$total
+)) |>
+  mutate(city_state = "Baltimore, MD") |>
+  select(city_state, estimate, conf.low, conf.high)
+```
+
+## For all cities
+
+```{r}
+city_props <- city_totals |>
+  mutate(
+    test_obj = map2(unsolved, total, ~ prop.test(.x, .y)),
+    test_tidy = map(test_obj, broom::tidy)
+  ) |>
+  select(city_state, test_tidy) |>
+  unnest(test_tidy) |>
+  select(city_state, estimate, conf.low, conf.high)
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
